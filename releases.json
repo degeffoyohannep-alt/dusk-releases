@@ -1,20 +1,4 @@
 {
-  "version": "2026.11.21.3",
-  "name": "Dusk Store: 20 More Apps (Logo Fix)",
-  "date": "2026-11-21",
-  "channel": "Stable",
-  "summary": "Adds 20 optional streaming, sports, and media website shortcuts and fixes oversized Home screen logos.",
-  "file": "https://github.com/degeffoyohannep-alt/dusk-releases/releases/download/v2026.11.21.3/Dusk-store-20-apps.iso",
-  "sizeBytes": 672137216,
-  "sha256": "c67153fa0c8c3cb638ffacf406056325bd5b4e5723c497130bf16420dcf0b1bd",
-  "notes": [
-    "The Store now has 27 website shortcuts: 7 included on Home and 20 more to add.",
-    "Select Add to Home to put an app shortcut on the active profile's Home screen.",
-    "Home screen logos are sized correctly.",
-    "These are web shortcuts, not downloaded native Linux applications."
-  ]
-},
-{
   "schemaVersion": 1,
   "releases": [
     {
