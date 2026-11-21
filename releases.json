@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "releases": [
+    {
+      "version": "2026.11.21.1",
+      "name": "Dusk Release Checker",
+      "date": "2026-11-21",
+      "channel": "Stable",
+      "summary": "Adds a Settings screen that checks the published Dusk release catalog and downloads newer ISO files.",
+      "file": "downloads/Dusk-release-checker.iso",
+      "sizeBytes": 672137216,
+      "sha256": "7fd08444ba4f7f3323a1dc206a2854e84ee6672661b21c94a47997f89fe707d3",
+      "notes": [
+        "Enter the public HTTPS URL to releases.json in Settings → OS updates.",
+        "Check for updates and download a newer Dusk ISO to Chromium’s Downloads folder.",
+        "The downloaded ISO must still be booted manually; live-system updates are not installed automatically."
+      ]
+    },
+    {
+      "version": "2026.11.21",
+      "name": "Dusk Voice Controls",
+      "date": "2026-11-21",
+      "channel": "Stable",
+      "summary": "A Dusk live ISO with push-to-talk voice commands for opening apps and powering off the TV.",
+      "file": "downloads/Dusk-voice-controls.iso",
+      "sizeBytes": 672137216,
+      "sha256": "b7c4dc15604396d80ae1ea8ae622102bf42c1a4924fb604433ba25c9714805a3",
+      "notes": [
+        "Press Talk to Dusk and say commands such as “open YouTube” or “power off the TV.”",
+        "Voice recognition starts only after you press the microphone button and requires internet access."
+      ]
+    }
+  ]
+}

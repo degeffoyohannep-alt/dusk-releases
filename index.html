@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090b14">
+  <meta name="description" content="Download Dusk TV OS releases and review what's new.">
+  <title>Dusk Releases</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color: #f7f5fc;
+      background: #090b14;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --muted: #aaa8b8;
+      --accent: #d7bcff;
+      --panel: rgba(25, 27, 43, .76);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 75% 4%, rgba(116, 77, 165, .27), transparent 35%),
+        radial-gradient(ellipse at 8% 78%, rgba(34, 73, 123, .16), transparent 36%),
+        #090b14;
+    }
+    a { color: inherit; }
+    button { font: inherit; }
+    .shell { width: min(1050px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 27px 0; }
+    .brand { display: inline-flex; align-items: center; gap: 11px; font-size: 15px; font-weight: 800; letter-spacing: .16em; text-decoration: none; }
+    .brand-mark { width: 30px; height: 30px; border-radius: 10px; background: linear-gradient(145deg, #f0d7ff, #aa82ef 70%); box-shadow: 0 0 25px rgba(197,159,255,.35); }
+    .top-link { color: var(--muted); font-size: 14px; text-decoration: none; }
+    .top-link:hover, .text-link:hover { color: #fff; }
+    main { padding: 66px 0 85px; }
+    .eyebrow { margin: 0 0 15px; color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
+    h1 { max-width: 680px; margin: 0; font-size: clamp(44px, 8vw, 82px); line-height: .98; letter-spacing: -.06em; }
+    .intro { max-width: 600px; margin: 22px 0 42px; color: #c2bfce; font-size: 17px; line-height: 1.65; }
+    .release-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 30px; padding: clamp(24px, 5vw, 42px); border: 1px solid rgba(255,255,255,.13); border-radius: 26px; background: linear-gradient(130deg, rgba(42,38,61,.88), var(--panel)); box-shadow: 0 28px 80px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.06); backdrop-filter: blur(20px); }
+    .release-card h2 { margin: 0; font-size: clamp(26px, 4vw, 38px); letter-spacing: -.035em; }
+    .release-meta { display: flex; flex-wrap: wrap; gap: 9px; margin: 15px 0 22px; color: var(--muted); font-size: 13px; }
+    .badge { padding: 5px 10px; border: 1px solid rgba(215,188,255,.22); border-radius: 99px; color: #eadbff; background: rgba(174,132,235,.11); }
+    .notes-heading { margin: 24px 0 10px; font-size: 14px; }
+    .notes { margin: 0; padding-left: 19px; color: #d1cedb; line-height: 1.75; }
+    .release-aside { display: flex; min-width: 185px; flex-direction: column; align-items: flex-start; justify-content: center; gap: 12px; }
+    .download {
+      display: inline-flex;
+      min-height: 50px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 20px;
+      border: 0;
+      border-radius: 999px;
+      color: #191322;
+      background: #f2e9ff;
+      font-weight: 800;
+      text-decoration: none;
+      transition: transform .18s ease, background .18s ease;
+    }
+    .download:hover { transform: translateY(-2px); background: #dfc8ff; }
+    .file-info { max-width: 210px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .checksum { width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,.1); border-radius: 12px; background: rgba(0,0,0,.18); }
+    .checksum-label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+    .checksum code { display: block; overflow-wrap: anywhere; color: #e4d7f6; font-size: 10px; line-height: 1.5; }
+    .history { margin-top: 57px; }
+    .history h2 { margin: 0 0 16px; font-size: 20px; }
+    .history-item { padding: 18px 0; border-top: 1px solid rgba(255,255,255,.1); }
+    .history-item h3 { margin: 0 0 6px; font-size: 15px; }
+    .history-item p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .notice { margin-top: 38px; padding: 17px 19px; border: 1px solid rgba(215,188,255,.15); border-radius: 14px; color: #c5c0d0; background: rgba(255,255,255,.035); font-size: 13px; line-height: 1.65; }
+    .notice strong { color: #eee5fa; }
+    .error { padding: 20px; border: 1px solid rgba(255,120,135,.4); border-radius: 15px; color: #ffd9df; background: rgba(115,28,44,.22); line-height: 1.6; }
+    footer { padding: 24px 0 34px; border-top: 1px solid rgba(255,255,255,.08); color: #858393; font-size: 12px; line-height: 1.7; }
+    footer a { color: #c8b4e8; }
+    [hidden] { display: none !important; }
+
+    @media (max-width: 700px) {
+      .shell { width: min(100% - 30px, 560px); }
+      .topbar { padding: 20px 0; }
+      main { padding: 48px 0 60px; }
+      .release-card { grid-template-columns: 1fr; gap: 25px; }
+      .release-aside { min-width: 0; }
+      .file-info { max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="shell topbar">
+    <a class="brand" href="./" aria-label="Dusk releases home"><span class="brand-mark" aria-hidden="true"></span>DUSK</a>
+    <a class="top-link" href="#release-history">Release history</a>
+  </header>
+
+  <main class="shell">
+    <p class="eyebrow">Dusk TV OS · Official downloads</p>
+    <h1>A calmer way<br>to watch.</h1>
+    <p class="intro">Get the latest Dusk live-system image, see what changed, and verify your download before you install it.</p>
+
+    <div id="release-error" class="error" role="alert" hidden></div>
+    <section class="release-card" id="latest-release" aria-labelledby="release-title" hidden>
+      <div>
+        <p class="eyebrow">Latest release</p>
+        <h2 id="release-title"></h2>
+        <div class="release-meta">
+          <span class="badge" id="release-version"></span>
+          <span id="release-date"></span>
+          <span id="release-channel"></span>
+        </div>
+        <p id="release-summary" class="intro" style="margin:0;font-size:15px"></p>
+        <h3 class="notes-heading">What’s new</h3>
+        <ul class="notes" id="release-notes"></ul>
+      </div>
+      <aside class="release-aside" aria-label="Download">
+        <a class="download" id="download-link" href="#">Download ISO</a>
+        <div class="file-info" id="file-info"></div>
+        <div class="checksum">
+          <span class="checksum-label">SHA-256 checksum</span>
+          <code id="release-checksum"></code>
+        </div>
+      </aside>
+    </section>
+
+    <section class="history" id="release-history" aria-labelledby="history-title" hidden>
+      <h2 id="history-title">Previous releases</h2>
+      <div id="history-list"></div>
+    </section>
+
+    <aside class="notice">
+      <strong>Important:</strong> Dusk releases are bootable ISO downloads. This page does
+      not automatically install an update on an existing live system. Back up files,
+      verify the checksum, and follow the installation instructions supplied with the
+      release. Do not write an ISO to a disk that contains data you need.
+    </aside>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Dusk community project. Streaming services and their logos belong to their respective owners.
+      <a href="./releases.json">View release metadata</a>.
+    </div>
+  </footer>
+
+  <script>
+    (() => {
+      const errorBox = document.getElementById("release-error");
+      const latestSection = document.getElementById("latest-release");
+      const historySection = document.getElementById("release-history");
+      const releasesUrlPattern = /^(?:(?:\.{1,2}\/|\/|https:\/\/)[a-zA-Z0-9._~:/?#\[\]@!$&'()*+,;=%-]+|[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9._~-]+)*)$/;
+      const checksumPattern = /^[a-f0-9]{64}$/i;
+
+      function showError(message) {
+        errorBox.textContent = message;
+        errorBox.hidden = false;
+      }
+
+      function formatDate(value) {
+        const date = new Date(`${value}T00:00:00Z`);
+        if (Number.isNaN(date.getTime())) throw new Error("The release date in releases.json is invalid.");
+        return new Intl.DateTimeFormat(undefined, { dateStyle: "long", timeZone: "UTC" }).format(date);
+      }
+
+      function validateRelease(release) {
+        if (!release || typeof release !== "object"
+          || typeof release.version !== "string"
+          || typeof release.name !== "string"
+          || typeof release.date !== "string"
+          || typeof release.summary !== "string"
+          || typeof release.file !== "string"
+          || !releasesUrlPattern.test(release.file)
+          || typeof release.sha256 !== "string"
+          || !checksumPattern.test(release.sha256)
+          || !Number.isSafeInteger(release.sizeBytes)
+          || !Array.isArray(release.notes)
+          || !release.notes.every(note => typeof note === "string")) {
+          throw new Error("A release entry in releases.json is incomplete or invalid.");
+        }
+        return release;
+      }
+
+      function formatSize(bytes) {
+        return `${(bytes / (1024 * 1024)).toFixed(0)} MiB ISO`;
+      }
+
+      function renderRelease(release) {
+        document.getElementById("release-title").textContent = release.name;
+        document.getElementById("release-version").textContent = `Build ${release.version}`;
+        document.getElementById("release-date").textContent = formatDate(release.date);
+        document.getElementById("release-channel").textContent = `${release.channel || "Stable"} · 64-bit PC`;
+        document.getElementById("release-summary").textContent = release.summary;
+        document.getElementById("file-info").textContent = `${release.file.split("/").pop()} · ${formatSize(release.sizeBytes)}`;
+        document.getElementById("release-checksum").textContent = release.sha256;
+        document.getElementById("download-link").href = release.file;
+
+        const notes = document.getElementById("release-notes");
+        release.notes.forEach(note => {
+          const item = document.createElement("li");
+          item.textContent = note;
+          notes.append(item);
+        });
+        latestSection.hidden = false;
+      }
+
+      function renderHistory(releases, latest) {
+        const history = releases.filter(release => release !== latest);
+        if (!history.length) return;
+        const container = document.getElementById("history-list");
+        history.forEach(release => {
+          const article = document.createElement("article");
+          article.className = "history-item";
+          const heading = document.createElement("h3");
+          heading.textContent = `${release.name} · Build ${release.version}`;
+          const description = document.createElement("p");
+          description.textContent = `${formatDate(release.date)} — ${release.summary}`;
+          article.append(heading, description);
+          container.append(article);
+        });
+        historySection.hidden = false;
+      }
+
+      async function loadReleases() {
+        try {
+          const response = await fetch("./releases.json", { cache: "no-store" });
+          if (!response.ok) throw new Error(`Could not load releases.json (HTTP ${response.status}).`);
+          const catalog = await response.json();
+          if (!catalog || !Array.isArray(catalog.releases) || catalog.releases.length === 0) {
+            throw new Error("No releases are listed in releases.json yet.");
+          }
+          const releases = catalog.releases.map(validateRelease);
+          renderRelease(releases[0]);
+          renderHistory(releases, releases[0]);
+        } catch (error) {
+          console.error("Could not load the Dusk release catalog.", error);
+          showError(`${error.message} Serve this folder from a web server and check that releases.json and its ISO files are uploaded.`);
+        }
+      }
+
+      void loadReleases();
+    })();
+  </script>
+</body>
+</html>
