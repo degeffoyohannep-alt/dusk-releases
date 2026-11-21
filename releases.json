@@ -7,7 +7,7 @@
       "date": "2026-11-21",
       "channel": "Stable",
       "summary": "Adds a Settings screen that checks the published Dusk release catalog and downloads newer ISO files.",
-      "file": "downloads/Dusk-release-checker.iso",
+      "file": "https://github.com/degeffoyohannep-alt/dusk-releases/releases/download/v2026.11.21.1/Dusk-release-checker.iso",
       "sizeBytes": 672137216,
       "sha256": "7fd08444ba4f7f3323a1dc206a2854e84ee6672661b21c94a47997f89fe707d3",
       "notes": [
