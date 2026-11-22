@@ -3,242 +3,860 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#090b14">
-  <meta name="description" content="Download Dusk TV OS releases and review what's new.">
-  <title>Dusk Releases</title>
+  <meta name="theme-color" content="#090a12">
+  <meta name="description" content="Meet Dusk: a TV-style home screen that boots from a Debian live system. See how it works and download the latest ISO.">
+  <title>Dusk — Your screen, made simple</title>
   <style>
     :root {
       color-scheme: dark;
       font-family: Inter, "Segoe UI", Arial, sans-serif;
       color: #f7f5fc;
-      background: #090b14;
+      background: #090a12;
       font-synthesis: none;
       text-rendering: optimizeLegibility;
-      --muted: #aaa8b8;
-      --accent: #d7bcff;
-      --panel: rgba(25, 27, 43, .76);
+      --muted: #a9a8b7;
+      --soft: #d3cede;
+      --accent: #d8c0ff;
+      --line: rgba(255,255,255,.12);
+      --panel: rgba(255,255,255,.055);
     }
 
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 88px; }
     body {
       min-width: 320px;
-      min-height: 100vh;
       margin: 0;
+      overflow-x: hidden;
       background:
-        radial-gradient(ellipse at 75% 4%, rgba(116, 77, 165, .27), transparent 35%),
-        radial-gradient(ellipse at 8% 78%, rgba(34, 73, 123, .16), transparent 36%),
-        #090b14;
+        radial-gradient(ellipse at 75% 4%, rgba(116,77,165,.22), transparent 34rem),
+        radial-gradient(ellipse at 4% 55%, rgba(42,94,151,.14), transparent 36rem),
+        #090a12;
+    }
+    body::before {
+      position: fixed;
+      z-index: -1;
+      inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size: 64px 64px;
+      content: "";
+      mask-image: linear-gradient(to bottom, black, transparent 78%);
+      pointer-events: none;
     }
     a { color: inherit; }
     button { font: inherit; }
-    .shell { width: min(1050px, calc(100% - 40px)); margin: 0 auto; }
-    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 27px 0; }
-    .brand { display: inline-flex; align-items: center; gap: 11px; font-size: 15px; font-weight: 800; letter-spacing: .16em; text-decoration: none; }
-    .brand-mark { width: 30px; height: 30px; border-radius: 10px; background: linear-gradient(145deg, #f0d7ff, #aa82ef 70%); box-shadow: 0 0 25px rgba(197,159,255,.35); }
-    .top-link { color: var(--muted); font-size: 14px; text-decoration: none; }
-    .top-link:hover, .text-link:hover { color: #fff; }
-    main { padding: 66px 0 85px; }
-    .eyebrow { margin: 0 0 15px; color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
-    h1 { max-width: 680px; margin: 0; font-size: clamp(44px, 8vw, 82px); line-height: .98; letter-spacing: -.06em; }
-    .intro { max-width: 600px; margin: 22px 0 42px; color: #c2bfce; font-size: 17px; line-height: 1.65; }
-    .release-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 30px; padding: clamp(24px, 5vw, 42px); border: 1px solid rgba(255,255,255,.13); border-radius: 26px; background: linear-gradient(130deg, rgba(42,38,61,.88), var(--panel)); box-shadow: 0 28px 80px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.06); backdrop-filter: blur(20px); }
-    .release-card h2 { margin: 0; font-size: clamp(26px, 4vw, 38px); letter-spacing: -.035em; }
-    .release-meta { display: flex; flex-wrap: wrap; gap: 9px; margin: 15px 0 22px; color: var(--muted); font-size: 13px; }
-    .badge { padding: 5px 10px; border: 1px solid rgba(215,188,255,.22); border-radius: 99px; color: #eadbff; background: rgba(174,132,235,.11); }
-    .notes-heading { margin: 24px 0 10px; font-size: 14px; }
-    .notes { margin: 0; padding-left: 19px; color: #d1cedb; line-height: 1.75; }
-    .release-aside { display: flex; min-width: 185px; flex-direction: column; align-items: flex-start; justify-content: center; gap: 12px; }
-    .download {
-      display: inline-flex;
-      min-height: 50px;
-      align-items: center;
-      justify-content: center;
-      padding: 0 20px;
-      border: 0;
-      border-radius: 999px;
-      color: #191322;
-      background: #f2e9ff;
-      font-weight: 800;
-      text-decoration: none;
-      transition: transform .18s ease, background .18s ease;
+    .shell { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
+    .scroll-progress { position: fixed; z-index: 20; inset: 0 0 auto; height: 3px; background: rgba(255,255,255,.08); }
+    .scroll-progress span { display: block; width: 0; height: 100%; background: linear-gradient(90deg, #a788ee, #e1caff); box-shadow: 0 0 16px rgba(201,170,255,.65); }
+    .topbar { position: sticky; z-index: 10; top: 0; border-bottom: 1px solid rgba(255,255,255,.075); background: rgba(9,10,18,.78); backdrop-filter: blur(18px); }
+    .nav { display: flex; min-height: 76px; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { display: inline-flex; align-items: center; gap: 11px; font-size: 14px; font-weight: 850; letter-spacing: .2em; text-decoration: none; }
+    .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid rgba(255,255,255,.32); border-radius: 12px; color: #1a1424; background: linear-gradient(145deg,#f3e5ff,#ad88f2 72%); box-shadow: 0 0 26px rgba(178,140,242,.23); font-size: 19px; letter-spacing: 0; }
+    .nav-links { display: flex; align-items: center; gap: clamp(16px,3vw,34px); }
+    .nav-links a { color: var(--soft); font-size: 13px; text-decoration: none; transition: color .2s ease; }
+    .nav-links a:hover { color: white; }
+    .nav-links .nav-download { padding: 11px 16px; border: 1px solid rgba(216,192,255,.32); border-radius: 999px; color: #eee3ff; background: rgba(177,140,238,.1); }
+    main { overflow: clip; }
+    .hero { position: relative; display: grid; min-height: min(760px, calc(100svh - 76px)); align-items: center; padding-block: 94px 110px; }
+    .hero::after { position: absolute; z-index: -1; top: 10%; right: -24%; width: 66vw; max-width: 850px; aspect-ratio: 1; border: 1px solid rgba(211,185,255,.09); border-radius: 50%; box-shadow: 0 0 140px rgba(140,106,210,.08), inset 0 0 120px rgba(140,106,210,.045); content: ""; transform: scaleY(.66) rotate(-17deg); }
+    .hero-grid { display: grid; grid-template-columns: minmax(0,1.08fr) minmax(320px,.92fr); align-items: center; gap: 56px; }
+    .eyebrow { margin: 0 0 19px; color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; }
+    h1 { max-width: 720px; margin: 0; font-size: clamp(52px,8vw,100px); font-weight: 650; line-height: .96; letter-spacing: -.075em; }
+    .gradient-text { color: transparent; background: linear-gradient(100deg,#eee7ff 8%,#c9aaf7 52%,#9fb5ed); background-clip: text; -webkit-background-clip: text; }
+    .hero-copy { max-width: 520px; margin: 26px 0 31px; color: #c3c0cd; font-size: clamp(16px,1.8vw,19px); line-height: 1.7; }
+    .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+    .button { display: inline-flex; min-height: 50px; align-items: center; justify-content: center; gap: 10px; padding: 0 21px; border: 1px solid var(--line); border-radius: 999px; color: white; background: rgba(255,255,255,.055); font-size: 14px; font-weight: 750; text-decoration: none; transition: transform .2s ease, border-color .2s ease, background .2s ease; }
+    .button:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.3); background: rgba(255,255,255,.1); }
+    .button-primary { border-color: transparent; color: #171320; background: #eee4ff; box-shadow: 0 8px 32px rgba(186,150,240,.2); }
+    .button-primary:hover { border-color: transparent; background: #d9c2ff; }
+    .button[aria-disabled="true"] { opacity: .58; }
+    .arrow { font-size: 18px; }
+    .hero-note { display: flex; align-items: center; gap: 9px; margin-top: 21px; color: #8e8d9d; font-size: 12px; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #a8e4c4; box-shadow: 0 0 12px rgba(137,231,184,.65); }
+    .screen-wrap { position: relative; padding: 13px; border: 1px solid rgba(255,255,255,.2); border-radius: 27px; background: linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,.025) 45%); box-shadow: 0 36px 100px rgba(0,0,0,.5), 0 0 80px rgba(155,118,218,.14); transform: perspective(1100px) rotateY(-8deg) rotateX(3deg); }
+    .screen { position: relative; min-height: 350px; overflow: hidden; padding: 23px; border: 1px solid rgba(255,255,255,.12); border-radius: 17px; background: radial-gradient(ellipse at 78% 30%,rgba(113,81,157,.38),transparent 48%),linear-gradient(145deg,#171725,#0d0e18 72%); }
+    .screen-head { display: flex; align-items: center; justify-content: space-between; color: #c5bfd0; font-size: 10px; letter-spacing: .16em; }
+    .screen-clock { color: #f3edff; font-size: 13px; letter-spacing: .04em; }
+    .screen-hero { margin: 38px 0 29px; }
+    .screen-kicker { color: #c6a9f4; font-size: 8px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
+    .screen-title { max-width: 240px; margin-top: 10px; font-size: clamp(21px,3vw,34px); font-weight: 650; line-height: 1.05; letter-spacing: -.05em; }
+    .screen-subtitle { max-width: 205px; margin-top: 9px; color: #a8a4b3; font-size: 9px; line-height: 1.55; }
+    .screen-row-title { margin: 0 0 10px; color: #e8e4ef; font-size: 9px; font-weight: 750; }
+    .screen-apps { display: grid; grid-template-columns: repeat(4,1fr); gap: 9px; }
+    .screen-app { display: grid; min-height: 66px; align-content: space-between; padding: 9px; border: 1px solid rgba(255,255,255,.13); border-radius: 11px; background: linear-gradient(145deg,rgba(126,91,157,.56),rgba(34,35,53,.86)); }
+    .screen-app:nth-child(2) { background: linear-gradient(145deg,rgba(75,107,136,.55),rgba(28,32,49,.86)); }
+    .screen-app:nth-child(3) { background: linear-gradient(145deg,rgba(104,78,142,.6),rgba(37,32,54,.88)); }
+    .screen-app:nth-child(4) { background: linear-gradient(145deg,rgba(63,112,105,.57),rgba(26,41,43,.86)); }
+    .app-symbol { color: #f1e7ff; font-size: 17px; }
+    .app-label { color: #d8d2e0; font-size: 8px; font-weight: 700; }
+    .screen-glow { position: absolute; right: -44px; bottom: -88px; width: 210px; height: 170px; border-radius: 50%; background: rgba(160,115,223,.22); filter: blur(46px); pointer-events: none; }
+    .scroll-cue { position: absolute; bottom: 35px; left: 50%; display: grid; justify-items: center; gap: 9px; color: #9491a0; font-size: 9px; letter-spacing: .17em; text-decoration: none; text-transform: uppercase; transform: translateX(-50%); }
+    .scroll-cue::after { width: 1px; height: 35px; background: linear-gradient(var(--accent),transparent); content: ""; }
+    .demo-frame { overflow: hidden; border: 1px solid rgba(255,255,255,.17); border-radius: 24px; background: linear-gradient(145deg,rgba(255,255,255,.1),rgba(255,255,255,.025)); box-shadow: 0 30px 90px rgba(0,0,0,.32); }
+    .demo-frame-top, .demo-frame-bottom { display: flex; min-height: 43px; align-items: center; justify-content: space-between; gap: 15px; padding: 0 18px; color: #8d8a99; font-size: 9px; letter-spacing: .12em; }
+    .demo-frame-top { border-bottom: 1px solid rgba(255,255,255,.08); }
+    .demo-frame-bottom { border-top: 1px solid rgba(255,255,255,.08); font-size: 10px; letter-spacing: .02em; text-transform: none; }
+    .demo-frame-brand { display: flex; align-items: center; gap: 8px; color: #d7c6f0; font-weight: 800; }
+    .demo-frame-dot { width: 7px; height: 7px; border-radius: 50%; background: #ad8ce3; box-shadow: 0 0 10px rgba(173,140,227,.65); }
+    .demo-screen { --demo-fg: #f7f4ff; --demo-muted: #aaa5b7; min-height: 500px; padding: clamp(17px,3vw,30px); color: var(--demo-fg); background: radial-gradient(ellipse at 75% 4%,rgba(116,77,165,.23),transparent 40%),#0e0f19; transition: background .25s ease, color .25s ease; }
+    .demo-screen[data-demo-theme="light"] { --demo-fg: #242235; --demo-muted: #676477; background: radial-gradient(ellipse at 75% 4%,rgba(201,176,241,.42),transparent 40%),#ece9f4; }
+    .demo-screen-head { display: flex; align-items: center; justify-content: space-between; }
+    .demo-wordmark { color: var(--demo-fg); font-size: 12px; font-weight: 850; letter-spacing: .2em; }
+    .demo-clock { color: var(--demo-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+    .demo-menu { display: flex; width: fit-content; max-width: 100%; gap: 6px; margin: 20px 0 23px; padding: 5px; overflow-x: auto; border: 1px solid rgba(255,255,255,.1); border-radius: 999px; background: rgba(255,255,255,.045); }
+    .demo-menu-button { min-height: 36px; padding: 0 16px; border: 0; border-radius: 999px; color: var(--demo-muted); background: transparent; cursor: pointer; font-size: 12px; transition: background .18s ease, color .18s ease; }
+    .demo-menu-button[aria-selected="true"] { color: #211a2c; background: #e7d8ff; box-shadow: 0 4px 16px rgba(0,0,0,.15); }
+    .demo-panel { min-height: 340px; }
+    .demo-panel[hidden] { display: none; }
+    .demo-hero { position: relative; min-height: 166px; margin-bottom: 21px; padding: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,.13); border-radius: 16px; background: radial-gradient(ellipse at 80% 24%,rgba(169,128,220,.3),transparent 42%),linear-gradient(115deg,rgba(44,39,62,.94),rgba(21,22,34,.91)); }
+    [data-demo-theme="light"] .demo-hero { background: linear-gradient(115deg,#dad0eb,#f2eff8); }
+    .demo-kicker { margin: 0 0 9px; color: #c7a8f3; font-size: 9px; font-weight: 800; letter-spacing: .16em; }
+    [data-demo-theme="light"] .demo-kicker { color: #70559b; }
+    .demo-hero h3 { margin: 0; font-size: clamp(22px,4vw,36px); line-height: 1.02; letter-spacing: -.05em; }
+    .demo-hero p:not(.demo-kicker) { margin: 9px 0 0; color: var(--demo-muted); font-size: 11px; }
+    .demo-action { position: absolute; right: 23px; bottom: 23px; display: inline-flex; min-height: 37px; align-items: center; gap: 10px; padding: 0 13px; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; color: var(--demo-fg); background: rgba(255,255,255,.09); cursor: pointer; font-size: 10px; }
+    .demo-panel h4 { margin: 17px 0 9px; color: var(--demo-fg); font-size: 12px; }
+    .demo-tile-grid, .demo-store-grid, .demo-search-results { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 9px; }
+    .demo-tile { position: relative; display: flex; min-height: 82px; flex-direction: column; align-items: flex-start; justify-content: space-between; padding: 11px; overflow: hidden; border: 1px solid rgba(255,255,255,.14); border-radius: 13px; color: white; background: linear-gradient(145deg,#574a70,#20212f); cursor: pointer; text-align: left; transition: transform .18s ease, border-color .18s ease; }
+    .demo-tile:nth-child(4n+2) { background: linear-gradient(145deg,#385a70,#1c2433); }
+    .demo-tile:nth-child(4n+3) { background: linear-gradient(145deg,#654868,#2b2034); }
+    .demo-tile:nth-child(4n) { background: linear-gradient(145deg,#39665e,#1c302c); }
+    .demo-tile:hover, .demo-live-tile:hover, .demo-store-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.38); }
+    .demo-tile-symbol { color: #f1e7ff; font-size: 20px; }
+    .demo-tile-label { font-size: 10px; font-weight: 750; }
+    .demo-live-title { margin-top: 18px !important; }
+    .demo-live-strip { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 9px; }
+    .demo-live-tile { min-height: 48px; padding: 10px 12px; border: 1px solid rgba(255,255,255,.12); border-radius: 11px; color: var(--demo-fg); background: rgba(255,255,255,.055); cursor: pointer; font-size: 10px; font-weight: 700; text-align: left; transition: transform .18s ease, border-color .18s ease; }
+    .demo-panel-heading { margin: 7px 0 !important; color: var(--demo-fg); font-size: clamp(23px,4vw,34px) !important; letter-spacing: -.05em; }
+    .demo-panel-copy { margin: 0 0 20px; color: var(--demo-muted); font-size: 11px; line-height: 1.6; }
+    .demo-store-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+    .demo-store-card { display: flex; min-height: 106px; flex-direction: column; align-items: flex-start; justify-content: space-between; padding: 12px; border: 1px solid rgba(255,255,255,.12); border-radius: 13px; background: rgba(255,255,255,.045); transition: transform .18s ease, border-color .18s ease; }
+    .demo-store-card strong { color: var(--demo-fg); font-size: 11px; }
+    .demo-add-button { min-height: 29px; padding: 0 10px; border: 1px solid rgba(216,192,255,.28); border-radius: 999px; color: #e9dcff; background: rgba(177,140,238,.1); cursor: pointer; font-size: 9px; }
+    .demo-add-button[aria-pressed="true"] { color: #b6e4c9; border-color: rgba(140,224,175,.25); background: rgba(95,177,128,.1); }
+    .demo-search-label { display: block; margin: 17px 0 7px; color: var(--demo-muted); font-size: 10px; }
+    .demo-search-input { width: 100%; min-height: 46px; padding: 0 14px; border: 1px solid rgba(255,255,255,.15); border-radius: 12px; outline: none; color: var(--demo-fg); background: rgba(255,255,255,.055); font: inherit; font-size: 12px; }
+    .demo-search-input:focus { border-color: rgba(216,192,255,.65); box-shadow: 0 0 0 3px rgba(177,140,238,.13); }
+    .demo-search-results { grid-template-columns: repeat(3,minmax(0,1fr)); margin-top: 12px; }
+    .demo-setting-list { display: grid; gap: 8px; margin: 20px 0; }
+    .demo-setting { display: flex; min-height: 61px; align-items: center; justify-content: space-between; gap: 15px; padding: 10px 14px; border: 1px solid rgba(255,255,255,.1); border-radius: 12px; color: var(--demo-fg); background: rgba(255,255,255,.045); cursor: pointer; text-align: left; }
+    .demo-setting strong, .demo-setting small { display: block; }
+    .demo-setting strong { margin-bottom: 4px; font-size: 11px; }
+    .demo-setting small { color: var(--demo-muted); font-size: 9px; }
+    .demo-setting-value { color: #d9c6f4; font-size: 10px; }
+    .demo-feedback { min-height: 18px; margin-top: 15px; color: var(--demo-muted); font-size: 10px; }
+    .demo-disclaimer { margin: 16px 0 0; color: #92909e; font-size: 11px; line-height: 1.7; text-align: center; }
+    .section { padding-block: 104px; }
+    .section-top { display: flex; align-items: end; justify-content: space-between; gap: 30px; margin-bottom: 38px; }
+    .section-kicker { margin: 0 0 13px; color: var(--accent); font-size: 10px; font-weight: 800; letter-spacing: .21em; text-transform: uppercase; }
+    h2 { max-width: 720px; margin: 0; font-size: clamp(34px,5.5vw,62px); font-weight: 620; line-height: 1.04; letter-spacing: -.06em; }
+    .section-intro { max-width: 380px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.75; }
+    .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; counter-reset: step; }
+    .step { position: relative; min-height: 245px; padding: 25px; overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.018)); counter-increment: step; }
+    .step::before { display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid rgba(216,192,255,.23); border-radius: 13px; color: var(--accent); background: rgba(176,143,224,.11); content: "0" counter(step); font-size: 11px; font-weight: 800; }
+    .step::after { position: absolute; right: -35px; bottom: -60px; width: 155px; height: 155px; border: 1px solid rgba(214,192,255,.1); border-radius: 50%; box-shadow: 0 0 40px rgba(152,116,210,.09); content: ""; }
+    .step h3 { margin: 27px 0 10px; font-size: 19px; letter-spacing: -.025em; }
+    .step p { max-width: 300px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.75; }
+    .feature-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 15px; }
+    .feature { min-height: 230px; padding: clamp(24px,4vw,36px); border: 1px solid var(--line); border-radius: 22px; background: var(--panel); }
+    .feature-wide { grid-row: span 2; display: flex; flex-direction: column; justify-content: space-between; min-height: 485px; background: radial-gradient(ellipse at 20% 5%,rgba(137,99,190,.25),transparent 60%),rgba(255,255,255,.045); }
+    .feature-symbol { display: grid; width: 45px; height: 45px; place-items: center; border: 1px solid rgba(216,192,255,.23); border-radius: 15px; color: var(--accent); background: rgba(177,140,238,.1); font-size: 20px; }
+    .feature h3 { margin: 25px 0 10px; font-size: 21px; letter-spacing: -.03em; }
+    .feature p { max-width: 480px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.75; }
+    .mini-remote { display: flex; width: fit-content; align-items: center; gap: 7px; margin-top: 42px; padding: 9px; border: 1px solid rgba(255,255,255,.13); border-radius: 14px; background: rgba(8,9,16,.48); }
+    .key { display: grid; min-width: 31px; height: 29px; place-items: center; border: 1px solid rgba(255,255,255,.13); border-radius: 8px; color: #e5dcf4; font-size: 11px; }
+    .feature-note { display: flex; align-items: flex-start; gap: 12px; margin-top: 23px; padding: 15px; border: 1px solid rgba(216,192,255,.15); border-radius: 13px; color: #c9c4d2; background: rgba(0,0,0,.17); font-size: 12px; line-height: 1.65; }
+    .feature-note strong { color: #f1eaff; }
+    .download-section { position: relative; padding-block: 105px 120px; }
+    .download-panel { position: relative; display: grid; grid-template-columns: minmax(0,1fr) minmax(250px,.7fr); gap: 42px; padding: clamp(26px,5vw,54px); overflow: hidden; border: 1px solid rgba(216,192,255,.22); border-radius: 27px; background: radial-gradient(ellipse at 80% 10%,rgba(164,125,223,.23),transparent 44%),linear-gradient(130deg,rgba(39,34,55,.94),rgba(18,19,30,.94)); box-shadow: 0 35px 100px rgba(0,0,0,.25); }
+    .download-panel::after { position: absolute; z-index: 0; right: -85px; bottom: -175px; width: 360px; height: 360px; border: 1px solid rgba(216,192,255,.11); border-radius: 50%; box-shadow: 0 0 0 28px rgba(216,192,255,.025),0 0 0 58px rgba(216,192,255,.02); content: ""; pointer-events: none; }
+    .download-copy, .download-box { position: relative; z-index: 1; }
+    .download-copy h2 { font-size: clamp(38px,6vw,68px); }
+    .download-copy p { max-width: 540px; margin: 20px 0 0; color: #c5c0ce; font-size: 14px; line-height: 1.75; }
+    .download-box { align-self: center; padding: 20px; border: 1px solid rgba(255,255,255,.13); border-radius: 18px; background: rgba(8,9,16,.48); backdrop-filter: blur(14px); }
+    .download-box h3 { margin: 0 0 8px; font-size: 15px; }
+    .download-box p { margin: 0 0 15px; color: var(--muted); font-size: 12px; line-height: 1.65; }
+    .download-box .button { width: 100%; }
+    .download-box .button[aria-disabled="true"] { cursor: not-allowed; opacity: .48; pointer-events: none; }
+    .release-meta { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 13px; }
+    .tag { padding: 5px 8px; border: 1px solid rgba(216,192,255,.19); border-radius: 999px; color: #e5d7fa; background: rgba(177,140,238,.08); font-size: 10px; }
+    .countdown { margin: 15px 0; padding: 13px; border: 1px solid rgba(216,192,255,.17); border-radius: 13px; background: rgba(177,140,238,.065); }
+    .countdown-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; color: #d9ccea; font-size: 10px; font-weight: 750; }
+    .countdown-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 7px; }
+    .countdown-unit { padding: 8px 4px; border: 1px solid rgba(255,255,255,.08); border-radius: 9px; text-align: center; background: rgba(0,0,0,.17); }
+    .countdown-unit output { display: block; color: #f0e7ff; font-size: 20px; font-weight: 750; font-variant-numeric: tabular-nums; line-height: 1.2; }
+    .countdown-unit span { color: #9c97a9; font-size: 8px; letter-spacing: .1em; text-transform: uppercase; }
+    .checksum { margin-top: 13px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.1); }
+    .checksum span { display: block; margin-bottom: 5px; color: #9391a0; font-size: 9px; letter-spacing: .13em; text-transform: uppercase; }
+    .checksum code { display: block; overflow-wrap: anywhere; color: #d4c8e7; font-size: 9px; line-height: 1.6; }
+    .download-status { min-height: 19px; margin: 10px 0 0 !important; color: #aaa5b7 !important; font-size: 11px !important; }
+    .download-status.error { color: #ffc0c7 !important; }
+    .faq-list { border-top: 1px solid var(--line); }
+    details { border-bottom: 1px solid var(--line); }
+    summary { position: relative; padding: 21px 42px 21px 0; cursor: pointer; font-size: 15px; font-weight: 700; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { position: absolute; top: 20px; right: 4px; color: var(--accent); content: "+"; font-size: 20px; font-weight: 400; }
+    details[open] summary::after { content: "−"; }
+    details p { max-width: 750px; margin: -4px 0 22px; color: var(--muted); font-size: 13px; line-height: 1.75; }
+    .final-cta { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 28px 0 76px; border-top: 1px solid var(--line); }
+    .final-cta p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    footer { padding: 24px 0 35px; border-top: 1px solid rgba(255,255,255,.08); color: #898795; font-size: 11px; line-height: 1.8; }
+    footer .footer-row { display: flex; justify-content: space-between; gap: 20px; }
+    footer a { color: #cdbbe8; text-decoration: none; }
+    footer a:hover { color: white; }
+    .reveal { opacity: 1; transform: none; }
+    .js .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+    .js .reveal.is-visible { opacity: 1; transform: translateY(0); }
+    .js .reveal-delay-1 { transition-delay: .08s; }
+    .js .reveal-delay-2 { transition-delay: .16s; }
+    .js .reveal-delay-3 { transition-delay: .24s; }
+    :focus-visible { outline: 2px solid #d8c0ff; outline-offset: 4px; }
+    @media (max-width: 820px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+      .hero { min-height: auto; padding-block: 80px 110px; }
+      .screen-wrap { width: min(520px,100%); margin-inline: auto; transform: none; }
+      .screen { min-height: 330px; }
+      .hero::after { top: 28%; right: -44%; width: 100vw; }
+      .section { padding-block: 78px; }
+      .section-top { align-items: flex-start; flex-direction: column; }
+      .download-panel { grid-template-columns: 1fr; gap: 29px; }
+      .download-box { width: min(430px,100%); }
+      .demo-panel { min-height: 380px; }
     }
-    .download:hover { transform: translateY(-2px); background: #dfc8ff; }
-    .file-info { max-width: 210px; color: var(--muted); font-size: 12px; line-height: 1.5; }
-    .checksum { width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,.1); border-radius: 12px; background: rgba(0,0,0,.18); }
-    .checksum-label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
-    .checksum code { display: block; overflow-wrap: anywhere; color: #e4d7f6; font-size: 10px; line-height: 1.5; }
-    .history { margin-top: 57px; }
-    .history h2 { margin: 0 0 16px; font-size: 20px; }
-    .history-item { padding: 18px 0; border-top: 1px solid rgba(255,255,255,.1); }
-    .history-item h3 { margin: 0 0 6px; font-size: 15px; }
-    .history-item p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
-    .notice { margin-top: 38px; padding: 17px 19px; border: 1px solid rgba(215,188,255,.15); border-radius: 14px; color: #c5c0d0; background: rgba(255,255,255,.035); font-size: 13px; line-height: 1.65; }
-    .notice strong { color: #eee5fa; }
-    .error { padding: 20px; border: 1px solid rgba(255,120,135,.4); border-radius: 15px; color: #ffd9df; background: rgba(115,28,44,.22); line-height: 1.6; }
-    footer { padding: 24px 0 34px; border-top: 1px solid rgba(255,255,255,.08); color: #858393; font-size: 12px; line-height: 1.7; }
-    footer a { color: #c8b4e8; }
-    [hidden] { display: none !important; }
-
-    @media (max-width: 700px) {
-      .shell { width: min(100% - 30px, 560px); }
-      .topbar { padding: 20px 0; }
-      main { padding: 48px 0 60px; }
-      .release-card { grid-template-columns: 1fr; gap: 25px; }
-      .release-aside { min-width: 0; }
-      .file-info { max-width: none; }
+    @media (max-width: 620px) {
+      .shell { width: min(100% - 32px, 520px); }
+      .nav { min-height: 66px; }
+      .nav-links { gap: 13px; }
+      .nav-links a[href="#how"], .nav-links a[href="#features"] { display: none; }
+      .nav-links a { font-size: 11px; }
+      .nav-links .nav-download { padding: 9px 11px; }
+      .hero { padding-top: 64px; }
+      h1 { font-size: clamp(48px,14vw,76px); }
+      .steps { grid-template-columns: 1fr; }
+      .step { min-height: 205px; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .feature-wide { grid-row: auto; min-height: 360px; }
+      .download-section { padding-block: 70px 82px; }
+      .final-cta { align-items: flex-start; flex-direction: column; padding-bottom: 55px; }
+      footer .footer-row { flex-direction: column; }
+      .screen-wrap { padding: 8px; border-radius: 21px; }
+      .screen { min-height: 300px; padding: 17px; }
+      .scroll-cue { bottom: 27px; }
+      .demo-frame-top, .demo-frame-bottom { padding-inline: 11px; font-size: 8px; }
+      .demo-screen { min-height: 490px; padding: 15px 11px; }
+      .demo-menu { width: 100%; justify-content: space-between; gap: 2px; margin: 15px 0; }
+      .demo-menu-button { min-height: 34px; padding-inline: 10px; font-size: 10px; }
+      .demo-hero { min-height: 170px; padding: 17px; }
+      .demo-action { right: 15px; bottom: 15px; }
+      .demo-tile-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .demo-store-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .demo-search-results { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .demo-live-strip { grid-template-columns: 1fr; }
+      .demo-panel { min-height: 420px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      .js .reveal { opacity: 1; transform: none; }
     }
   </style>
+  <script>document.documentElement.classList.add("js");</script>
 </head>
 <body>
-  <header class="shell topbar">
-    <a class="brand" href="./" aria-label="Dusk releases home"><span class="brand-mark" aria-hidden="true"></span>DUSK</a>
-    <a class="top-link" href="#release-history">Release history</a>
+  <div class="scroll-progress" aria-hidden="true"><span id="scroll-progress-bar"></span></div>
+  <header class="topbar">
+    <nav class="shell nav" aria-label="Main navigation">
+      <a class="brand" href="#top" aria-label="Dusk home"><span class="brand-mark" aria-hidden="true">D</span>DUSK</a>
+      <div class="nav-links">
+        <a href="#demo">Live demo</a>
+        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a class="nav-download" href="#download">Get Dusk <span aria-hidden="true">↓</span></a>
+      </div>
+    </nav>
   </header>
 
-  <main class="shell">
-    <p class="eyebrow">Dusk TV OS · Official downloads</p>
-    <h1>A calmer way<br>to watch.</h1>
-    <p class="intro">Get the latest Dusk live-system image, see what changed, and verify your download before you install it.</p>
-
-    <div id="release-error" class="error" role="alert" hidden></div>
-    <section class="release-card" id="latest-release" aria-labelledby="release-title" hidden>
-      <div>
-        <p class="eyebrow">Latest release</p>
-        <h2 id="release-title"></h2>
-        <div class="release-meta">
-          <span class="badge" id="release-version"></span>
-          <span id="release-date"></span>
-          <span id="release-channel"></span>
+  <main id="top">
+    <section class="shell hero" aria-labelledby="hero-title">
+      <div class="hero-grid">
+        <div class="reveal is-visible">
+          <p class="eyebrow">A TV-style home for your screen</p>
+          <h1 id="hero-title">Less searching.<br><span class="gradient-text">More settling in.</span></h1>
+          <p class="hero-copy">Dusk turns a computer into a simple, remote-friendly TV experience. Start at Home, pick an app, and get back to what you want to watch.</p>
+          <div class="actions">
+            <a class="button button-primary" href="#download">Explore the latest ISO <span class="arrow" aria-hidden="true">↓</span></a>
+            <a class="button" href="#demo">Try the demo</a>
+            <a class="button" href="#how">See how it works</a>
+          </div>
+          <p class="hero-note"><span class="status-dot" aria-hidden="true"></span>Free to try · Debian live system · 64-bit PC</p>
         </div>
-        <p id="release-summary" class="intro" style="margin:0;font-size:15px"></p>
-        <h3 class="notes-heading">What’s new</h3>
-        <ul class="notes" id="release-notes"></ul>
+        <div class="screen-wrap reveal reveal-delay-1" aria-label="Illustration of the Dusk home screen">
+          <div class="screen">
+            <div class="screen-head"><span>D U S K</span><span class="screen-clock">8:42 PM</span></div>
+            <div class="screen-hero">
+              <div class="screen-kicker">Your evening starts here</div>
+              <div class="screen-title">A little less noise.<br>A lot more you.</div>
+              <div class="screen-subtitle">Your shows, channels, and favorite apps, all in one place.</div>
+            </div>
+            <div class="screen-row-title">Your apps</div>
+            <div class="screen-apps" aria-hidden="true">
+              <div class="screen-app"><span class="app-symbol">▶</span><span class="app-label">Video</span></div>
+              <div class="screen-app"><span class="app-symbol">♫</span><span class="app-label">Music</span></div>
+              <div class="screen-app"><span class="app-symbol">◉</span><span class="app-label">Media</span></div>
+              <div class="screen-app"><span class="app-symbol">☀</span><span class="app-label">Weather</span></div>
+            </div>
+            <div class="screen-glow"></div>
+          </div>
+        </div>
       </div>
-      <aside class="release-aside" aria-label="Download">
-        <a class="download" id="download-link" href="#">Download ISO</a>
-        <div class="file-info" id="file-info"></div>
-        <div class="checksum">
-          <span class="checksum-label">SHA-256 checksum</span>
-          <code id="release-checksum"></code>
+      <a class="scroll-cue" href="#how">Scroll to explore</a>
+    </section>
+
+    <section class="shell section" id="demo" aria-labelledby="demo-title">
+      <div class="section-top reveal">
+        <div>
+          <p class="section-kicker">Try it right here</p>
+          <h2 id="demo-title">Take Dusk for a spin.</h2>
         </div>
-      </aside>
+        <p class="section-intro">Use the menu, open the Store, try Search, and change a demo setting. No ISO or installation needed.</p>
+      </div>
+      <div class="demo-frame reveal">
+        <div class="demo-frame-top">
+          <span class="demo-frame-brand"><span class="demo-frame-dot"></span>DUSK INTERACTIVE PREVIEW</span>
+          <span>PREVIEW ONLY</span>
+        </div>
+        <div class="demo-screen" id="dusk-demo" tabindex="-1" aria-label="Interactive Dusk home screen demo">
+          <div class="demo-screen-head">
+            <span class="demo-wordmark">DUSK</span>
+            <span class="demo-clock" id="demo-clock"></span>
+          </div>
+          <nav class="demo-menu" role="tablist" aria-label="Dusk demo sections">
+            <button type="button" role="tab" class="demo-menu-button" id="demo-tab-home" data-demo-tab="home" aria-controls="demo-panel-home" aria-selected="true" tabindex="0">Home</button>
+            <button type="button" role="tab" class="demo-menu-button" id="demo-tab-store" data-demo-tab="store" aria-controls="demo-panel-store" aria-selected="false" tabindex="-1">Store</button>
+            <button type="button" role="tab" class="demo-menu-button" id="demo-tab-search" data-demo-tab="search" aria-controls="demo-panel-search" aria-selected="false" tabindex="-1">Search</button>
+            <button type="button" role="tab" class="demo-menu-button" id="demo-tab-settings" data-demo-tab="settings" aria-controls="demo-panel-settings" aria-selected="false" tabindex="-1">Settings</button>
+          </nav>
+          <div class="demo-panels">
+            <section class="demo-panel" id="demo-panel-home" role="tabpanel" data-demo-panel="home" aria-labelledby="demo-tab-home">
+              <div class="demo-hero">
+                <p class="demo-kicker">YOUR EVENING STARTS HERE</p>
+                <h3>A little less noise.<br>A lot more you.</h3>
+                <p>Your favorite things, gathered in one place.</p>
+                <button type="button" class="demo-action" data-demo-goto="store">Browse the Store <span aria-hidden="true">→</span></button>
+              </div>
+              <h4>Your apps</h4>
+              <div class="demo-tile-grid" id="demo-home-apps"></div>
+              <h4 class="demo-live-title">Live TV</h4>
+              <div class="demo-live-strip">
+                <button type="button" class="demo-live-tile" data-demo-open="Live TV">Live news</button>
+                <button type="button" class="demo-live-tile" data-demo-open="Weather">Weather</button>
+                <button type="button" class="demo-live-tile" data-demo-open="Sports">Sports</button>
+              </div>
+            </section>
+            <section class="demo-panel" id="demo-panel-store" role="tabpanel" data-demo-panel="store" aria-labelledby="demo-tab-store" hidden>
+              <p class="demo-kicker">MAKE IT YOURS</p>
+              <h3 class="demo-panel-heading">The Store</h3>
+              <p class="demo-panel-copy">Choose a shortcut to add to your demo Home screen.</p>
+              <div class="demo-store-grid" id="demo-store-apps"></div>
+            </section>
+            <section class="demo-panel" id="demo-panel-search" role="tabpanel" data-demo-panel="search" aria-labelledby="demo-tab-search" hidden>
+              <p class="demo-kicker">FIND SOMETHING TO WATCH</p>
+              <h3 class="demo-panel-heading">Search</h3>
+              <label class="demo-search-label" for="demo-search-input">Search demo apps</label>
+              <input class="demo-search-input" type="search" id="demo-search-input" placeholder="Try “music” or “sports”" autocomplete="off">
+              <div class="demo-search-results" id="demo-search-results" aria-live="polite"></div>
+            </section>
+            <section class="demo-panel" id="demo-panel-settings" role="tabpanel" data-demo-panel="settings" aria-labelledby="demo-tab-settings" hidden>
+              <p class="demo-kicker">YOUR DUSK</p>
+              <h3 class="demo-panel-heading">Settings</h3>
+              <div class="demo-setting-list">
+                <button type="button" class="demo-setting" data-demo-setting="appearance" aria-pressed="false">
+                  <span><strong>Appearance</strong><small>Switch the demo between dark and light</small></span><span class="demo-setting-value">Dark</span>
+                </button>
+                <button type="button" class="demo-setting" data-demo-setting="profile">
+                  <span><strong>Profile</strong><small>See how profile selection feels</small></span><span class="demo-setting-value">Guest</span>
+                </button>
+                <button type="button" class="demo-setting" data-demo-setting="updates">
+                  <span><strong>OS updates</strong><small>Check the release information</small></span><span class="demo-setting-value">View</span>
+                </button>
+              </div>
+              <p class="demo-panel-copy">These controls are a simulation. They do not save settings or update your computer.</p>
+            </section>
+          </div>
+          <div class="demo-feedback" id="demo-feedback" role="status" aria-live="polite">Welcome to the Dusk demo. Select a tile to try it.</div>
+        </div>
+        <div class="demo-frame-bottom">
+          <span>Arrow keys move · Enter selects · Esc returns to Home</span>
+          <span id="demo-keyboard-hint">Click inside the preview to use your keyboard</span>
+        </div>
+      </div>
+      <p class="demo-disclaimer reveal">This is an interactive website preview, not the Dusk operating system. App launches, profiles, and settings are simulated and nothing is saved.</p>
     </section>
 
-    <section class="history" id="release-history" aria-labelledby="history-title" hidden>
-      <h2 id="history-title">Previous releases</h2>
-      <div id="history-list"></div>
+    <section class="shell section" id="how" aria-labelledby="how-title">
+      <div class="section-top reveal">
+        <div>
+          <p class="section-kicker">How it works</p>
+          <h2 id="how-title">From power-on<br>to play in a few steps.</h2>
+        </div>
+        <p class="section-intro">Dusk is a live operating system image with a TV-style interface on top. It runs from the ISO instead of silently changing the computer’s existing operating system.</p>
+      </div>
+      <div class="steps">
+        <article class="step reveal">
+          <h3>Boot Dusk</h3>
+          <p>Start a compatible 64-bit PC from the Dusk ISO. Dusk logs into its live session and opens the full-screen home screen.</p>
+        </article>
+        <article class="step reveal reveal-delay-1">
+          <h3>Choose with a remote or keyboard</h3>
+          <p>Move around with the arrow keys, press Enter to select, and use Esc to go back. A TV remote that sends keyboard controls can work too.</p>
+        </article>
+        <article class="step reveal reveal-delay-2">
+          <h3>Open a web app</h3>
+          <p>App tiles are shortcuts to streaming and media websites in Chromium. They are not native apps, and some services need an account or subscription.</p>
+        </article>
+      </div>
     </section>
 
-    <aside class="notice">
-      <strong>Important:</strong> Dusk releases are bootable ISO downloads. This page does
-      not automatically install an update on an existing live system. Back up files,
-      verify the checksum, and follow the installation instructions supplied with the
-      release. Do not write an ISO to a disk that contains data you need.
-    </aside>
+    <section class="shell section" id="features" aria-labelledby="features-title">
+      <div class="section-top reveal">
+        <div>
+          <p class="section-kicker">Made for the living room</p>
+          <h2 id="features-title">A familiar screen.<br>A simpler way around.</h2>
+        </div>
+        <p class="section-intro">Built around browsing from the couch, with clear paths to your apps, live web channels, search, and settings.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature feature-wide reveal">
+          <div>
+            <span class="feature-symbol" aria-hidden="true">⌖</span>
+            <h3>Navigation that feels like TV</h3>
+            <p>Home, Store, Search, and Settings are organized for focus navigation. Use a keyboard or compatible remote instead of reaching for a mouse.</p>
+          </div>
+          <div>
+            <div class="mini-remote" aria-label="Arrow keys, Enter, and Escape">
+              <span class="key">↑</span><span class="key">←</span><span class="key">↓</span><span class="key">→</span><span class="key">Enter</span><span class="key">Esc</span>
+            </div>
+            <div class="feature-note"><span aria-hidden="true">i</span><span><strong>Easy way back:</strong> press Esc to return to the previous screen or Home.</span></div>
+          </div>
+        </article>
+        <article class="feature reveal reveal-delay-1">
+          <span class="feature-symbol" aria-hidden="true">＋</span>
+          <h3>Your Home, your apps</h3>
+          <p>Choose shortcuts in the Store and add them to your Home screen. Dusk stores preferences in the browser profile.</p>
+        </article>
+        <article class="feature reveal reveal-delay-2">
+          <span class="feature-symbol" aria-hidden="true">↻</span>
+          <h3>Updates you control</h3>
+          <p>The update checker downloads a newer ISO. You choose when to boot it; Dusk does not replace the running system automatically.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="download-section" id="download" aria-labelledby="download-title">
+      <div class="shell">
+        <div class="download-panel reveal">
+          <div class="download-copy">
+            <p class="section-kicker">Release day · November 30, 2026</p>
+            <h2 id="download-title">Your next screen<br>starts here.</h2>
+            <p>The Dusk Generic Icons release is scheduled for November 30, 2026. The download stays locked until release day and the ISO is published. Try it in VirtualBox first, or boot a compatible 64-bit PC.</p>
+          </div>
+          <aside class="download-box" aria-label="Latest Dusk release">
+            <h3 id="release-name">Dusk Generic Icons</h3>
+            <div class="release-meta" id="release-meta"></div>
+            <p id="release-summary">Download opens on November 30, 2026, when the release is published.</p>
+            <div class="countdown" id="countdown" aria-label="Countdown to November 30, 2026">
+              <div class="countdown-heading"><span>Release countdown</span><span>Local time</span></div>
+              <div class="countdown-grid" aria-hidden="true">
+                <div class="countdown-unit"><output id="countdown-days">--</output><span>Days</span></div>
+                <div class="countdown-unit"><output id="countdown-hours">--</output><span>Hours</span></div>
+                <div class="countdown-unit"><output id="countdown-minutes">--</output><span>Minutes</span></div>
+                <div class="countdown-unit"><output id="countdown-seconds">--</output><span>Seconds</span></div>
+              </div>
+            </div>
+            <a class="button button-primary" id="download-link" aria-disabled="true" tabindex="-1">Available November 30</a>
+            <p class="download-status" id="download-status" role="status" aria-live="polite">Download unlocks after release day begins and the ISO is published.</p>
+            <div class="checksum" id="checksum-box" hidden>
+              <span>SHA-256 · <span id="release-file"></span></span>
+              <code id="release-checksum"></code>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="shell section" id="questions" aria-labelledby="questions-title">
+      <div class="section-top reveal">
+        <div>
+          <p class="section-kicker">Before you boot</p>
+          <h2 id="questions-title">Good to know.</h2>
+        </div>
+        <p class="section-intro">A few details about what a live ISO does—and what it doesn’t do.</p>
+      </div>
+      <div class="faq-list reveal">
+        <details>
+          <summary>Will Dusk replace or erase my current operating system?</summary>
+          <p>Dusk is configured as a live system. Booting the ISO runs Dusk from the boot media and does not automatically install it onto your computer. When testing, carefully select the ISO as the boot device and do not choose an installer or disk operation unless you intend to.</p>
+        </details>
+        <details>
+          <summary>Are the Store items full native apps?</summary>
+          <p>No. They are website shortcuts that open in Chromium. Internet access is required, and each service controls its own sign-in, subscription, device support, and availability.</p>
+        </details>
+        <details>
+          <summary>Will the ISO download install an update?</summary>
+          <p>No. The update checker only downloads an ISO. To use it, boot from that ISO yourself. Back up anything important before changing boot settings.</p>
+        </details>
+        <details>
+          <summary>Can my settings stay between live boots?</summary>
+          <p>Yes, using the documented VirtualBox setup with a separate writable persistence disk. Keep that disk attached when starting Dusk. The disk is for Dusk settings and browser data; do not select a disk that contains files you need.</p>
+        </details>
+      </div>
+      <div class="final-cta reveal">
+        <p>Ready to see the Dusk home screen for yourself?<br><span>Start with the latest published ISO.</span></p>
+        <a class="button button-primary" href="#download">Get the ISO <span aria-hidden="true">↑</span></a>
+      </div>
+    </section>
   </main>
 
   <footer>
-    <div class="shell">
-      Dusk community project. Streaming services and their logos belong to their respective owners.
-      <a href="./releases.json">View release metadata</a>.
+    <div class="shell footer-row">
+      <span>© 2026 Dusk · Independent community project. Service names belong to their respective owners.</span>
+      <a href="https://github.com/degeffoyohannep-alt/dusk-releases" target="_blank" rel="noopener noreferrer">Release catalog and source files ↗</a>
     </div>
   </footer>
 
   <script>
     (() => {
-      const errorBox = document.getElementById("release-error");
-      const latestSection = document.getElementById("latest-release");
-      const historySection = document.getElementById("release-history");
-      const releasesUrlPattern = /^(?:(?:\.{1,2}\/|\/|https:\/\/)[a-zA-Z0-9._~:/?#\[\]@!$&'()*+,;=%-]+|[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9._~-]+)*)$/;
-      const checksumPattern = /^[a-f0-9]{64}$/i;
+      const progressBar = document.getElementById("scroll-progress-bar");
+      const revealItems = document.querySelectorAll(".reveal:not(.is-visible)");
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      function showError(message) {
-        errorBox.textContent = message;
-        errorBox.hidden = false;
+      function updateScrollProgress() {
+        const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = scrollable > 0 ? Math.min(window.scrollY / scrollable, 1) : 0;
+        progressBar.style.width = `${progress * 100}%`;
       }
 
-      function formatDate(value) {
-        const date = new Date(`${value}T00:00:00Z`);
-        if (Number.isNaN(date.getTime())) throw new Error("The release date in releases.json is invalid.");
-        return new Intl.DateTimeFormat(undefined, { dateStyle: "long", timeZone: "UTC" }).format(date);
+      window.addEventListener("scroll", updateScrollProgress, { passive: true });
+      window.addEventListener("resize", updateScrollProgress);
+      updateScrollProgress();
+
+      if (reducedMotion || !("IntersectionObserver" in window)) {
+        revealItems.forEach(item => item.classList.add("is-visible"));
+      } else {
+        const revealObserver = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add("is-visible");
+            revealObserver.unobserve(entry.target);
+          });
+        }, { threshold: 0.12, rootMargin: "0px 0px -35px 0px" });
+        revealItems.forEach(item => revealObserver.observe(item));
       }
 
-      function validateRelease(release) {
-        if (!release || typeof release !== "object"
-          || typeof release.version !== "string"
-          || typeof release.name !== "string"
-          || typeof release.date !== "string"
-          || typeof release.summary !== "string"
-          || typeof release.file !== "string"
-          || !releasesUrlPattern.test(release.file)
-          || typeof release.sha256 !== "string"
-          || !checksumPattern.test(release.sha256)
-          || !Number.isSafeInteger(release.sizeBytes)
-          || !Array.isArray(release.notes)
-          || !release.notes.every(note => typeof note === "string")) {
-          throw new Error("A release entry in releases.json is incomplete or invalid.");
+      const demo = document.getElementById("dusk-demo");
+      const demoFeedback = document.getElementById("demo-feedback");
+      const demoTabs = [...demo.querySelectorAll("[data-demo-tab]")];
+      const demoPanels = [...demo.querySelectorAll("[data-demo-panel]")];
+      const demoHomeApps = document.getElementById("demo-home-apps");
+      const demoStoreApps = document.getElementById("demo-store-apps");
+      const demoSearchInput = document.getElementById("demo-search-input");
+      const demoSearchResults = document.getElementById("demo-search-results");
+      const demoKeyboardHint = document.getElementById("demo-keyboard-hint");
+      const demoApps = [
+        { name: "YouTube", symbol: "▶", keywords: "video music live" },
+        { name: "Netflix", symbol: "▶", keywords: "video movies series" },
+        { name: "Prime Video", symbol: "▶", keywords: "video movies" },
+        { name: "Spotify", symbol: "♫", keywords: "music audio" },
+        { name: "Disney+", symbol: "✦", keywords: "video movies family" },
+        { name: "Plex", symbol: "◉", keywords: "media movies video" },
+        { name: "Weather", symbol: "☀", keywords: "weather forecast" },
+        { name: "Max", symbol: "▶", keywords: "video movies series" },
+        { name: "Tubi", symbol: "▶", keywords: "video movies free" },
+        { name: "Twitch", symbol: "●", keywords: "live games sports" }
+      ];
+      const demoHomeAppNames = new Set(demoApps.slice(0, 7).map(app => app.name));
+
+      function setDemoView(name) {
+        demoTabs.forEach(tab => {
+          const selected = tab.dataset.demoTab === name;
+          tab.setAttribute("aria-selected", String(selected));
+          tab.tabIndex = selected ? 0 : -1;
+        });
+        demoPanels.forEach(panel => {
+          panel.hidden = panel.dataset.demoPanel !== name;
+        });
+      }
+
+      function makeDemoTile(app) {
+        const tile = document.createElement("button");
+        tile.type = "button";
+        tile.className = "demo-tile";
+        tile.dataset.demoOpen = app.name;
+        const symbol = document.createElement("span");
+        symbol.className = "demo-tile-symbol";
+        symbol.setAttribute("aria-hidden", "true");
+        symbol.textContent = app.symbol;
+        const label = document.createElement("span");
+        label.className = "demo-tile-label";
+        label.textContent = app.name;
+        tile.append(symbol, label);
+        return tile;
+      }
+
+      function renderDemoHomeApps() {
+        demoHomeApps.replaceChildren();
+        [...demoHomeAppNames].forEach(name => {
+          const app = demoApps.find(item => item.name === name);
+          if (app) demoHomeApps.append(makeDemoTile(app));
+        });
+      }
+
+      function renderDemoStore() {
+        demoStoreApps.replaceChildren();
+        demoApps.slice(7).forEach(app => {
+          const card = document.createElement("div");
+          card.className = "demo-store-card";
+          const name = document.createElement("strong");
+          name.textContent = app.name;
+          const add = document.createElement("button");
+          const isAdded = demoHomeAppNames.has(app.name);
+          add.type = "button";
+          add.className = "demo-add-button";
+          add.dataset.demoAdd = app.name;
+          add.setAttribute("aria-pressed", String(isAdded));
+          add.textContent = isAdded ? "On Home" : "Add to Home";
+          card.append(name, add);
+          demoStoreApps.append(card);
+        });
+      }
+
+      function renderDemoSearch(query = "") {
+        const term = query.trim().toLowerCase();
+        const matches = demoApps.filter(app => !term
+          || app.name.toLowerCase().includes(term)
+          || app.keywords.includes(term));
+        demoSearchResults.replaceChildren();
+        matches.forEach(app => demoSearchResults.append(makeDemoTile(app)));
+        if (!matches.length) {
+          const empty = document.createElement("p");
+          empty.className = "demo-panel-copy";
+          empty.textContent = "No demo apps match that search.";
+          demoSearchResults.append(empty);
         }
-        return release;
       }
 
-      function formatSize(bytes) {
-        return `${(bytes / (1024 * 1024)).toFixed(0)} MiB ISO`;
-      }
+      renderDemoHomeApps();
+      renderDemoStore();
+      renderDemoSearch();
+      demo.querySelectorAll("[data-demo-tab]").forEach(tab => {
+        tab.addEventListener("click", () => setDemoView(tab.dataset.demoTab));
+      });
+      demoSearchInput.addEventListener("input", () => renderDemoSearch(demoSearchInput.value));
+      demo.addEventListener("click", event => {
+        const target = event.target.closest("button");
+        if (!target || !demo.contains(target)) return;
 
-      function renderRelease(release) {
-        document.getElementById("release-title").textContent = release.name;
-        document.getElementById("release-version").textContent = `Build ${release.version}`;
-        document.getElementById("release-date").textContent = formatDate(release.date);
-        document.getElementById("release-channel").textContent = `${release.channel || "Stable"} · 64-bit PC`;
-        document.getElementById("release-summary").textContent = release.summary;
-        document.getElementById("file-info").textContent = `${release.file.split("/").pop()} · ${formatSize(release.sizeBytes)}`;
-        document.getElementById("release-checksum").textContent = release.sha256;
-        document.getElementById("download-link").href = release.file;
-
-        const notes = document.getElementById("release-notes");
-        release.notes.forEach(note => {
-          const item = document.createElement("li");
-          item.textContent = note;
-          notes.append(item);
-        });
-        latestSection.hidden = false;
-      }
-
-      function renderHistory(releases, latest) {
-        const history = releases.filter(release => release !== latest);
-        if (!history.length) return;
-        const container = document.getElementById("history-list");
-        history.forEach(release => {
-          const article = document.createElement("article");
-          article.className = "history-item";
-          const heading = document.createElement("h3");
-          heading.textContent = `${release.name} · Build ${release.version}`;
-          const description = document.createElement("p");
-          description.textContent = `${formatDate(release.date)} — ${release.summary}`;
-          article.append(heading, description);
-          container.append(article);
-        });
-        historySection.hidden = false;
-      }
-
-      async function loadReleases() {
-        try {
-          const response = await fetch("./releases.json", { cache: "no-store" });
-          if (!response.ok) throw new Error(`Could not load releases.json (HTTP ${response.status}).`);
-          const catalog = await response.json();
-          if (!catalog || !Array.isArray(catalog.releases) || catalog.releases.length === 0) {
-            throw new Error("No releases are listed in releases.json yet.");
+        if (target.dataset.demoGoto) {
+          setDemoView(target.dataset.demoGoto);
+          demo.querySelector(`[data-demo-tab="${target.dataset.demoGoto}"]`).focus();
+          return;
+        }
+        if (target.dataset.demoOpen) {
+          demoFeedback.textContent = `Preview only: ${target.dataset.demoOpen} would open in Dusk.`;
+          return;
+        }
+        if (target.dataset.demoAdd) {
+          const appName = target.dataset.demoAdd;
+          if (demoHomeAppNames.has(appName)) {
+            demoHomeAppNames.delete(appName);
+            demoFeedback.textContent = `${appName} removed from the demo Home screen.`;
+          } else {
+            demoHomeAppNames.add(appName);
+            demoFeedback.textContent = `${appName} added to the demo Home screen.`;
           }
-          const releases = catalog.releases.map(validateRelease);
-          renderRelease(releases[0]);
-          renderHistory(releases, releases[0]);
+          renderDemoHomeApps();
+          renderDemoStore();
+          return;
+        }
+        if (target.dataset.demoSetting === "appearance") {
+          const isLight = target.getAttribute("aria-pressed") !== "true";
+          target.setAttribute("aria-pressed", String(isLight));
+          target.querySelector(".demo-setting-value").textContent = isLight ? "Light" : "Dark";
+          demo.dataset.demoTheme = isLight ? "light" : "dark";
+          demoFeedback.textContent = `Demo appearance changed to ${isLight ? "light" : "dark"}.`;
+          return;
+        }
+        if (target.dataset.demoSetting === "profile") {
+          target.querySelector(".demo-setting-value").textContent = "Guest";
+          demoFeedback.textContent = "The demo profile is Guest. This preview does not save profile data.";
+          return;
+        }
+        if (target.dataset.demoSetting === "updates") {
+          demoFeedback.textContent = "In Dusk, update checking downloads an ISO; it does not install it automatically.";
+        }
+      });
+      demo.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          setDemoView("home");
+          demoTabs[0].focus();
+          demoFeedback.textContent = "Back to Home.";
+          return;
+        }
+        if (!["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"].includes(event.key)
+          || event.target.matches("input, textarea, select")) return;
+
+        const controls = [...demo.querySelectorAll("button:not(:disabled), input:not(:disabled)")]
+          .filter(control => !control.closest("[hidden]"));
+        if (!controls.length) return;
+        const currentIndex = controls.indexOf(document.activeElement);
+        const direction = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : -1;
+        const nextIndex = currentIndex < 0
+          ? (direction > 0 ? 0 : controls.length - 1)
+          : (currentIndex + direction + controls.length) % controls.length;
+        const nextControl = controls[nextIndex];
+        event.preventDefault();
+        if (nextControl.dataset.demoTab) setDemoView(nextControl.dataset.demoTab);
+        nextControl.focus();
+      });
+      demo.addEventListener("focusin", () => {
+        demoKeyboardHint.textContent = "Keyboard controls active";
+      });
+      demo.addEventListener("focusout", () => {
+        window.setTimeout(() => {
+          if (!demo.contains(document.activeElement)) {
+            demoKeyboardHint.textContent = "Click inside the preview to use your keyboard";
+          }
+        }, 0);
+      });
+      document.getElementById("demo-clock").textContent = new Intl.DateTimeFormat(undefined, {
+        hour: "numeric",
+        minute: "2-digit"
+      }).format(new Date());
+
+      const releaseName = document.getElementById("release-name");
+      const releaseMeta = document.getElementById("release-meta");
+      const releaseSummary = document.getElementById("release-summary");
+      const downloadLink = document.getElementById("download-link");
+      const downloadStatus = document.getElementById("download-status");
+      const checksumBox = document.getElementById("checksum-box");
+      const checksum = document.getElementById("release-checksum");
+      const releaseFile = document.getElementById("release-file");
+      const countdown = document.getElementById("countdown");
+      const countdownDays = document.getElementById("countdown-days");
+      const countdownHours = document.getElementById("countdown-hours");
+      const countdownMinutes = document.getElementById("countdown-minutes");
+      const countdownSeconds = document.getElementById("countdown-seconds");
+      const catalogUrl = "https://raw.githubusercontent.com/degeffoyohannep-alt/dusk-releases/main/releases.json";
+      const releaseVersion = "2026.11.21.4";
+      const releaseDate = new Date(2026, 10, 30, 0, 0, 0, 0);
+      const checksumPattern = /^[a-f0-9]{64}$/i;
+      let scheduledRelease = null;
+
+      function updateCountdown() {
+        const remaining = releaseDate.getTime() - Date.now();
+        if (remaining <= 0) {
+          countdown.hidden = true;
+          updateDownloadAvailability();
+          return false;
+        }
+
+        const totalSeconds = Math.floor(remaining / 1000);
+        countdownDays.textContent = String(Math.floor(totalSeconds / 86400)).padStart(2, "0");
+        countdownHours.textContent = String(Math.floor((totalSeconds % 86400) / 3600)).padStart(2, "0");
+        countdownMinutes.textContent = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+        countdownSeconds.textContent = String(totalSeconds % 60).padStart(2, "0");
+        return true;
+      }
+
+      function updateDownloadAvailability() {
+        if (Date.now() < releaseDate.getTime()) return;
+        if (!scheduledRelease) {
+          downloadLink.removeAttribute("href");
+          downloadLink.setAttribute("aria-disabled", "true");
+          downloadLink.tabIndex = -1;
+          downloadLink.textContent = "Release not published yet";
+          downloadStatus.textContent = "The download will appear here once the scheduled ISO is published.";
+          return;
+        }
+
+        downloadLink.href = scheduledRelease.url;
+        downloadLink.removeAttribute("aria-disabled");
+        downloadLink.removeAttribute("tabindex");
+        downloadLink.textContent = "Download ISO";
+        downloadLink.setAttribute("aria-label", `Download Dusk ${releaseVersion} ISO`);
+        downloadStatus.textContent = "The scheduled release is available. Bootable live image · 64-bit PC.";
+        releaseFile.textContent = scheduledRelease.fileName;
+        checksum.textContent = scheduledRelease.sha256;
+        checksumBox.hidden = false;
+      }
+
+      const countdownTimer = window.setInterval(() => {
+        if (!updateCountdown()) window.clearInterval(countdownTimer);
+      }, 1000);
+      updateCountdown();
+
+      function addTag(text) {
+        const tag = document.createElement("span");
+        tag.className = "tag";
+        tag.textContent = text;
+        releaseMeta.append(tag);
+      }
+
+      async function loadLatestRelease() {
+        try {
+          const response = await fetch(catalogUrl, { cache: "no-store" });
+          if (!response.ok) throw new Error(`Release catalog returned HTTP ${response.status}.`);
+          const catalog = await response.json();
+          const release = catalog && Array.isArray(catalog.releases)
+            ? catalog.releases.find(item => item && item.version === releaseVersion)
+            : null;
+          if (!release) {
+            releaseName.textContent = "Dusk Generic Icons";
+            releaseSummary.textContent = "The scheduled ISO has not been published to the release catalog yet.";
+            downloadStatus.textContent = Date.now() < releaseDate.getTime()
+              ? "Download unlocks on November 30, 2026, and only after the scheduled ISO is published."
+              : "The release date has arrived; the download will appear when the ISO is published.";
+            updateDownloadAvailability();
+            return;
+          }
+          if (typeof release.name !== "string" || typeof release.version !== "string"
+            || typeof release.summary !== "string" || typeof release.file !== "string"
+            || !Number.isSafeInteger(release.sizeBytes) || release.sizeBytes <= 0
+            || typeof release.sha256 !== "string" || !checksumPattern.test(release.sha256)) {
+            throw new Error("The latest release entry is incomplete.");
+          }
+
+          const fileUrl = new URL(release.file, catalogUrl);
+          if (fileUrl.protocol !== "https:") throw new Error("The release download must use HTTPS.");
+
+          releaseName.textContent = release.name;
+          releaseSummary.textContent = release.summary;
+          releaseMeta.replaceChildren();
+          addTag(`Build ${release.version}`);
+          addTag(`${Math.round(release.sizeBytes / (1024 * 1024))} MiB ISO`);
+          if (release.date) addTag(release.date);
+          scheduledRelease = {
+            url: fileUrl.href,
+            fileName: fileUrl.pathname.split("/").pop() || "Dusk ISO",
+            sha256: release.sha256
+          };
+          if (Date.now() < releaseDate.getTime()) {
+            downloadStatus.textContent = "The release is listed, but downloads remain locked until November 30, 2026.";
+          } else {
+            updateDownloadAvailability();
+          }
         } catch (error) {
-          console.error("Could not load the Dusk release catalog.", error);
-          showError(`${error.message} Serve this folder from a web server and check that releases.json and its ISO files are uploaded.`);
+          console.error("Could not load the latest Dusk release.", error);
+          releaseName.textContent = "Dusk Generic Icons";
+          releaseSummary.textContent = "The scheduled ISO has not been published to the release catalog yet.";
+          downloadStatus.textContent = Date.now() < releaseDate.getTime()
+            ? "Download unlocks on November 30, 2026, and only after the scheduled ISO is published."
+            : "Could not verify the scheduled ISO. The download remains locked.";
+          downloadStatus.classList.add("error");
+          updateDownloadAvailability();
         }
       }
 
-      void loadReleases();
+      void loadLatestRelease();
     })();
   </script>
 </body>
